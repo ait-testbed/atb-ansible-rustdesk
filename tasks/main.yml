@@ -9,11 +9,12 @@
         mode: '0755'
 
     - name: Run RustDesk server install script with pre-defined answers
-      ansible.builtin.shell: |
-        bash /tmp/install.sh <<EOF
-        1
-        2
-        EOF
+      ansible.builtin.expect: 
+        command: /tmp/install.sh
+        responses:
+          'Choose your preferred connection method: auto-resolve current WAN IP or enter your DNS/Domain:': '1'
+          'Please choose if you want to download configs and install HTTP server:': '2'
+          'waiting for the keypress': '\n'
       become: true
       register: install_output
 
