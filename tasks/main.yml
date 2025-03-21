@@ -24,12 +24,12 @@
 
     - name: Extract and clean the public key from the output
       ansible.builtin.set_fact:
-        rustdesk_public_key: "{{ install_output.stdout | regex_search('Your public key is ([A-Za-z0-9+\/=]+)', '\\1') | trim }}"
+        rustdesk_public_key: "{{ install_output.stdout | regex_search('Your public key is ([A-Za-z0-9+\/=]+)', '\\1') | first }}"
 
 
     - name: Print the extracted public key to the console
       ansible.builtin.debug:
-        msg: "The public key is: {{ rustdesk_public_key }}"
+        msg: "The public key is: {{ rustdesk_public_key[0] }}"
 
     - name: Save the public key to a file in the home directory
       ansible.builtin.copy:
