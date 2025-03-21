@@ -38,11 +38,6 @@
         group: "{{ ansible_user }}"
         mode: '0644'
 
-    - name: Send Enter key to finish installation
-      ansible.builtin.shell: |
-        echo "" | bash /tmp/install.sh
-      become: true
-
 - name: Install RustDesk Client
   when: install_client
   block:
