@@ -22,9 +22,10 @@
       ansible.builtin.debug:
         msg: "install output is: {{ install_output.stdout }}"
 
-    - name: Extract the public key from the output
+    - name: Extract and clean the public key from the output
       ansible.builtin.set_fact:
-        rustdesk_public_key: "{{ install_output.stdout | regex_search('Your public key is ([^\\n]+)', '\\1') }}"
+        rustdesk_public_key: "{{ install_output.stdout | regex_search('Your public key is ([^\\r]+)', '\\1') | trim }}"
+
 
     - name: Print the extracted public key to the console
       ansible.builtin.debug:
