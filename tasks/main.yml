@@ -1,2 +1,57 @@
 ---
-# tasks file for atb-ansible-rustdesk
+- name: Install RustDesk Server
+  when: install_server
+  block:
+    - name: Download RustDesk server install script
+      ansible.builtin.get_url:
+        url: "https://raw.githubusercontent.com/techahold/rustdeskinstall/master/install.sh"
+        dest: "/tmp/install.sh"
+        mode: '0755'
+
+    - name: Run RustDesk server install script with pre-defined answers
+      ansible.builtin.shell: |
+        bash /tmp/install.sh <<EOF
+        1
+        2
+        EOF
+      become: true
+      register: install_output
+
+    - name: Print the install output to the console
+      ansible.builtin.debug:
+        msg: "install output is: {{ install_output.stdout }}"
+
+    - name: Extract the public key from the output
+      ansible.builtin.set_fact:
+        rustdesk_public_key: "{{ install_output.stdout | regex_search('Your public key is ([^\\n]+)', '\\1') }}"
+
+    - name: Print the extracted public key to the console
+      ansible.builtin.debug:
+        msg: "The public key is: {{ rustdesk_public_key }}"
+
+    - name: Save the public key to a file in the home directory
+      ansible.builtin.copy:
+        dest: "/home/{{ ansible_user }}/rustdesk_public_key.txt" 
+        content: "{{ rustdesk_public_key }}"
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0644'
+
+    - name: Send Enter key to finish installation
+      ansible.builtin.shell: |
+        echo "" | bash /tmp/install.sh
+      become: true
+
+- name: Install RustDesk Client
+  when: install_client
+  block:
+    - name: Download RustDesk client package
+      ansible.builtin.get_url:
+        url: "https://github.com/rustdesk/rustdesk/releases/download/1.3.8/rustdesk-1.3.8-x86_64.deb"
+        dest: "/tmp/rustdesk.deb"
+
+    - name: Install RustDesk client package
+      ansible.builtin.apt:
+        deb: "/tmp/rustdesk.deb"
+        force: yes
+      become: true

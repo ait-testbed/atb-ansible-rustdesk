@@ -1,2 +1,2 @@
----
-# defaults file for atb-ansible-rustdesk
+install_server: true
+install_client: true
