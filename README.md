@@ -1,38 +1,56 @@
-Role Name
-=========
+# Ansible Role: RustDesk Install 
 
-A brief description of the role goes here.
+Installs the RustDesk remote desktop software components (Server and/or Client) on Debian/Ubuntu-based systems.
 
-Requirements
-------------
+This role can perform the following actions depending on configuration:
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+*   **Server Installation:**
+    *   Downloads and executes an external installation script (`install.sh` from `techahold/rustdeskinstall`).
+    *   Uses the `expect` module to automate the script's prompts (choosing auto WAN IP and skipping HTTP server setup).
+    *   Extracts the generated RustDesk **public key** from the script's output.
+    *   Saves the extracted public key to `~/rustdesk_public_key.txt` in the home directory of the user running the playbook (`ansible_user`).
+*   **Client Installation:**
+    *   Downloads a specific version (`1.3.8`) of the RustDesk client `.deb` package from GitHub releases.
+    *   Installs the downloaded `.deb` package using `apt`.
 
-Role Variables
---------------
+## Requirements
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+*   **Target OS:** Debian / Ubuntu (uses `apt` and expects `.deb` packages).
+*   **Root Access:** Requires `become: yes` as the role installs packages and runs the server install script with elevated privileges.
+*   **Internet Access:** Required to download the installation script and the client `.deb` package.
+*   **Python `pexpect`:** The `ansible.builtin.expect` module requires the `pexpect` Python library on the target machine (`pip install pexpect` or via system packages like `python3-pexpect`). Ansible usually handles this via `apt` dependencies if possible, but it's good to be aware of.
+*   **Ansible Version:** 2.9 or higher recommended.
 
-Dependencies
-------------
+## Role Variables
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+Available variables are listed below, along with default values (see `defaults/main.yml`):
 
-Example Playbook
-----------------
+| Variable         | Required | Default | Type    | Description                                                                                                |
+| ---------------- | -------- | ------- | ------- | ---------------------------------------------------------------------------------------------------------- |
+| `install_server` | No       | `true`  | Boolean | If `true`, executes the tasks to install the RustDesk server component and extract/save its public key.    |
+| `install_client` | No       | `true`  | Boolean | If `true`, executes the tasks to download and install the RustDesk client component (version `1.3.8`). |
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+## Dependencies
 
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+None. (Requires `pexpect` on the target, as noted in Requirements).
 
-License
--------
+## Example Playbook
 
-BSD
+```yaml
+---
+- hosts: remote_desktops
+  become: yes
+  vars:
+    # --- Optional Overrides ---
+    # Only install the server, not the client
+    # install_server: true
+    # install_client: false
 
-Author Information
-------------------
+    # Only install the client, not the server
+    # install_server: false
+    # install_client: true
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+  roles:
+    # Assuming the role is named 'ansible-role-rustdesk'
+    # and located in the standard roles path
+    - ansible-role-rustdesk
