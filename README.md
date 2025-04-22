@@ -54,3 +54,12 @@ None. (Requires `pexpect` on the target, as noted in Requirements).
     # Assuming the role is named 'ansible-role-rustdesk'
     # and located in the standard roles path
     - ansible-role-rustdesk
+
+
+## License
+
+GPL-3.0
+
+## Author Information
+
+Thorina Boenke (https://www.ait.ac.at)
